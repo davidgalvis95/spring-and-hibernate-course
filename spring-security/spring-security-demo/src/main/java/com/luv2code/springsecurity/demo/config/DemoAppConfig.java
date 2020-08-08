@@ -1,18 +1,38 @@
 package com.luv2code.springsecurity.demo.config;
 
+import java.beans.PropertyVetoException;
+import java.util.logging.Logger;
+
+import javax.management.RuntimeErrorException;
+import javax.sql.CommonDataSource;
+import javax.sql.DataSource;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.core.env.Environment;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
+import com.mchange.v2.c3p0.ComboPooledDataSource;
+
 @Configuration
 @EnableWebMvc
 @ComponentScan(basePackages="com.luv2code.springsecurity.demo")
+//The following annotation allow us to read the configuration that was set in the properties files of maven, not the application.properties
+@PropertySource("classpath:persistence-mysql.properties")
 public class DemoAppConfig {
-
+	
+	//the following injection allow us to set and read the environment set from the properties file
+	@Autowired
+	private Environment env;
 	// define a bean for ViewResolver
+	
+	private Logger logger = Logger.getLogger(getClass().getName());
+	
 
 	@Bean
 	public ViewResolver viewResolver() {
@@ -23,6 +43,48 @@ public class DemoAppConfig {
 		viewResolver.setSuffix(".jsp");
 		
 		return viewResolver;
+	}
+	
+	@Bean
+	public DataSource securityDataSource(){
+		
+		//create connection pool
+		ComboPooledDataSource securityDataSource = new ComboPooledDataSource();
+		//set the driver class
+		try {
+			securityDataSource.setDriverClass(env.getProperty("jdbc.driver"));
+		} catch (PropertyVetoException e) {
+			// TODO Auto-generated catch block
+			throw new RuntimeException(e);
+		}
+		//log the connection properties
+		logger.info(">>> jdbc.url=" + env.getProperty("jdbc.url"));
+		logger.info(">>> jdbc.user=" + env.getProperty("jdbc.user"));
+
+		//set the DB connection props
+		securityDataSource.setJdbcUrl(env.getProperty("jdbc.url"));
+		securityDataSource.setUser(env.getProperty("jdbc.user"));
+		securityDataSource.setPassword(env.getProperty("jdbc.password"));
+		//set connection pool props
+		
+		//The following code will allow us to read the connection poll properties that were set in the properties file
+		securityDataSource.setInitialPoolSize(getIntPropety("connection.pool.initialPoolSize"));
+		securityDataSource.setMinPoolSize(getIntPropety("connection.pool.minPoolSize"));
+		securityDataSource.setMaxPoolSize(getIntPropety("connection.pool.maxPoolSize"));
+		securityDataSource.setMaxIdleTime(getIntPropety("connection.pool.maxIdleTime"));
+		
+		return securityDataSource;
+		
+	}
+	//need a helper method
+	//read environment property and convert to int
+	private int getIntPropety(String propName) 
+	{
+		String propVal = env.getProperty(propName);
+		
+		int intPropVal = Integer.parseInt(propVal);
+		return intPropVal;
+		
 	}
 	
 }
