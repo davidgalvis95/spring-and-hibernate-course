@@ -50,35 +50,6 @@ public class StudentRestController {
 		return theStudents.get(studentId);
 	}
 	
-	//Actually we have throw the exception but not added something to handle it, whis is why we have to set up some 
-	//@ExceptionHandler so that we can handle it
-	//Here in this following code we are saying that this code can catch StudentNotFoundExceptions
-	@ExceptionHandler
-	public ResponseEntity<StudentErrorResponse> handleException (StudentNotFoundException exc) {
-		
-		//create a StudentErrorResponse
-		
-		StudentErrorResponse error = new StudentErrorResponse();
-		error.setStatus(HttpStatus.NOT_FOUND.value());
-		error.setMessage(exc.getMessage());
-		error.setTimestamp(System.currentTimeMillis());
-		
-		return new ResponseEntity<>(error,HttpStatus.NOT_FOUND);
-	}
-	
-	//Add another exception handler, we can do this for wny type of exception that is being thrown
-	@ExceptionHandler
-	public ResponseEntity<StudentErrorResponse> handleException (Exception exc) {
-		
-		
-		StudentErrorResponse error = new StudentErrorResponse();
-		error.setStatus(HttpStatus.BAD_REQUEST.value());
-		error.setMessage(exc.getMessage());
-		error.setTimestamp(System.currentTimeMillis());
-		
-		return new ResponseEntity<>(error,HttpStatus.BAD_REQUEST);
-	}
-	
 }
 
 
