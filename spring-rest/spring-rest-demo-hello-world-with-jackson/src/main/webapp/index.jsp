@@ -11,5 +11,7 @@
     <!-- With the page cotext we are pointing to the page context where the index.jsp is saved in -->
     <a href="${pageContext.request.contextPath}/test/hello">hello</a>
     
+    <a href="${pageContext.request.contextPath}/api/students">the students</a>
+    
 </body>
 </html>
