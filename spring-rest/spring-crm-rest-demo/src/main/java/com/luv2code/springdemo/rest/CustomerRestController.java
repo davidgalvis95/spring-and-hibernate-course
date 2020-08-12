@@ -3,6 +3,7 @@ package com.luv2code.springdemo.rest;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -59,6 +60,23 @@ public class CustomerRestController {
 		//Here it will be needed that tha id will be passed in the body
 		customerService.saveCustomer(theCustomer);
 		return theCustomer;
+	}
+	
+	@DeleteMapping("/customers/:customerId")
+	public String deleteCustomer(@PathVariable int customerId){
+		//Jackson will automatically convert that pojo to JSON we dont need to convert it
+		//If the customer is not found in DB then it will be null, and jackson will return a blank space
+		//if there is a null, so we need to add some exception to handle it
+		//as well as adding the bad request exception handling
+		
+		Customer theCustomer = customerService.getCustomer(customerId);
+		if(theCustomer == null) {
+			throw new CustomerNotFoundException("The customer id not found: " + customerId);
+		}
+		
+		customerService.deleteCustomer(customerId);
+		
+		return "Deleted customer" + customerId;
 	}
 
 }
