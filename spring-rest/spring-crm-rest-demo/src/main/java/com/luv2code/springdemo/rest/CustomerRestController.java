@@ -5,6 +5,9 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -32,7 +35,30 @@ public class CustomerRestController {
 		//If the customer is not found in DB then it will be null, and jackson will return a blank space
 		//if there is a null, so we need to add some exception to handle it
 		//as well as adding the bad request exception handling
-		return customerService.getCustomer(customerId);
+		
+		Customer theCustomer = customerService.getCustomer(customerId);
+		if(theCustomer == null) {
+			throw new CustomerNotFoundException("The customer id not found: " + customerId);
+		}
+		return theCustomer;
+	}
+	
+	@PostMapping("/customers")
+	public Customer addCustomer(@RequestBody Customer theCustomer) {
+		
+		//The id should not be passed in the body
+		//Here we are sending an id of 0 due that we need it to be a new customer. So maybe if the id is passed there, this allow us to 
+		//set this customer as a new customer
+		theCustomer.setId(0);
+		customerService.saveCustomer(theCustomer);
+		return theCustomer;
+	}
+	
+	@PutMapping("/customers")
+	public Customer updateCustomer(@RequestBody Customer theCustomer) {
+		//Here it will be needed that tha id will be passed in the body
+		customerService.saveCustomer(theCustomer);
+		return theCustomer;
 	}
 
 }
